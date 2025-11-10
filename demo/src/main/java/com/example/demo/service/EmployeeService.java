@@ -7,8 +7,12 @@ import com.example.demo.dto.SecondHighestSalaryResponse;
 import com.example.demo.entity.Employee;
 import com.example.demo.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +28,8 @@ public class EmployeeService {
     /**
      * Registers a new employee.
      */
+
+    @CachePut(value = "employees", key = "#result.id")
     public EmployeeResponse createEmployee(InputDto req) {
         if (repository.existsByUsername(req.getUsername())) {
             throw new IllegalArgumentException("username already exists");
@@ -45,6 +51,7 @@ public class EmployeeService {
         );
     }
 
+    @Cacheable("employees")
     public Optional<SecondHighestSalaryResponse> getSecondHighestSalary() {
         List<Double> distinctSalaries = repository.findDistinctExpectedSalariesDesc();
 
